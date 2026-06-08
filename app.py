@@ -68,6 +68,16 @@ def load_data():
     """Load KBO attendance data from CSV."""
     csv_path = Path(__file__).parent / "kbo_attendance.csv"
     df = pd.read_csv(csv_path)
+
+    # Defensive normalization: same franchise, different sponsor names
+    # Nexen Heroes (2008-2018) → Kiwoom Heroes (2019-) 
+    # SK Wyverns (2000-2020) → SSG Landers (2021-)
+    df['team'] = df['team'].replace({'Nexen': 'Kiwoom', 'SK': 'SSG'})
+    df['team_kr'] = df['team_kr'].replace({
+        '넥센 히어로즈': '키움 히어로즈',
+        'SK 와이번스': 'SSG 랜더스'
+    })
+
     # Add per-game average
     df['avg_per_game'] = (df['attendance'] / df['games']).round(0).astype(int)
     return df
